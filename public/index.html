@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FREEZER MINIBOT</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#02150c;--bg2:#06361f;--accent:#34f58a;--accent2:#00c96b;--soft:#b6ffd8;--danger:#ff6b6b;--success:#5dffa0;--glass:rgba(255,255,255,.09)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Poppins',system-ui,sans-serif;background:radial-gradient(900px 500px at 15% 0%,rgba(52,245,138,.22),transparent 60%),radial-gradient(800px 500px at 100% 100%,rgba(0,201,107,.2),transparent 60%),linear-gradient(135deg,var(--bg1),var(--bg2));background-attachment:fixed;color:#fff;padding:16px;overflow-x:hidden}
+body::before,body::after{content:"";position:fixed;width:320px;height:320px;border-radius:50%;filter:blur(80px);opacity:.45;z-index:-1;animation:float 14s ease-in-out infinite}
+body::before{background:var(--accent);top:8%;left:2%}
+body::after{background:var(--accent2);bottom:8%;right:2%;animation-delay:-7s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-30px) scale(1.12)}}
+.card{position:relative;overflow:hidden;width:100%;max-width:420px;background:linear-gradient(160deg,rgba(255,255,255,.16),rgba(255,255,255,.05));-webkit-backdrop-filter:blur(30px) saturate(190%);backdrop-filter:blur(30px) saturate(190%);border-radius:34px;padding:32px 24px;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),inset 0 -1px 0 rgba(255,255,255,.06),0 30px 70px rgba(0,0,0,.55),0 0 70px rgba(52,245,138,.15);text-align:center;border:1px solid rgba(255,255,255,.22)}
+.card>*{position:relative;z-index:1}
+.card::before{content:"";position:absolute;top:0;left:0;right:0;height:46%;background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0));border-radius:34px 34px 60% 60%/34px 34px 40px 40px;pointer-events:none;z-index:0}
+.card::after{content:"";position:absolute;top:-60%;left:-60%;width:40%;height:220%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transform:rotate(20deg);animation:sheen 7s ease-in-out infinite;pointer-events:none;z-index:0}
+@keyframes sheen{0%,60%{left:-60%}100%{left:130%}}
+h1{font-size:1.8rem;font-weight:700;letter-spacing:.5px;margin-bottom:4px;background:linear-gradient(90deg,#eafff3,var(--accent),#eafff3,var(--accent2));background-size:250% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shine 5s linear infinite;filter:drop-shadow(0 0 14px rgba(52,245,138,.45))}
+@keyframes shine{to{background-position:250% 0}}
+.status{font-size:.75rem;letter-spacing:1px;color:#c9ffe0;margin-bottom:6px}
+.sub{font-size:.8rem;color:rgba(255,255,255,.7);margin-bottom:22px;line-height:1.5}
+input{width:100%;border:1px solid rgba(255,255,255,.2);outline:none;padding:15px;border-radius:16px;background:rgba(255,255,255,.08);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;text-align:center;font-size:1rem;margin-bottom:14px;font-family:inherit;box-shadow:inset 0 2px 6px rgba(0,0,0,.25);transition:.25s}
+input:focus{border-color:var(--accent);box-shadow:inset 0 2px 6px rgba(0,0,0,.25),0 0 0 4px rgba(52,245,138,.22),0 0 22px rgba(52,245,138,.25)}
+input::placeholder{color:rgba(255,255,255,.45)}
+button{position:relative;overflow:hidden;width:100%;border:1px solid rgba(255,255,255,.35);border-radius:16px;padding:15px;font-size:1rem;font-weight:600;cursor:pointer;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0) 55%),linear-gradient(90deg,var(--accent),var(--accent2));color:#032012;transition:.25s;font-family:inherit;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 10px 26px rgba(52,245,138,.35)}
+button::after{content:"";position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:btnshine 3.5s ease-in-out infinite}
+@keyframes btnshine{0%,55%{left:-80%}100%{left:140%}}
+button:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 14px 34px rgba(52,245,138,.55)}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.55;cursor:wait;transform:none}
+#result{margin-top:22px;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;font-size:.9rem}
+.code{padding:14px 22px;border-radius:18px;border:1px solid rgba(182,255,216,.55);background:rgba(52,245,138,.1);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);color:var(--soft);font-weight:700;font-size:1.6rem;letter-spacing:5px;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 0 28px rgba(52,245,138,.3);text-shadow:0 0 14px rgba(52,245,138,.6)}
+.code small{display:block;font-size:.65rem;opacity:.65;letter-spacing:1px;margin-top:4px;font-weight:400;text-shadow:none}
+.steps{font-size:.75rem;color:rgba(255,255,255,.78);text-align:left;line-height:1.65;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:12px 16px;width:100%;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.loader{width:28px;height:28px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;filter:drop-shadow(0 0 6px rgba(52,245,138,.6))}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ok{color:var(--success)}.err{color:var(--danger)}
+footer{margin-top:20px;font-size:.7rem;color:rgba(255,255,255,.5);letter-spacing:1px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>FREEZER MINIBOT</h1>
+  <div class="status">👑 <span id="stats">SYSTEM ACTIVE</span> 👑</div>
+  <div class="sub">Link your number and your own bot starts instantly.<br>No session ID. No setup.</div>
+
+  <input type="tel" id="number" inputmode="numeric" placeholder="2547XXXXXXXX (with country code)" autocomplete="off">
+  <button id="go" onclick="getCode()">✨ GET PAIRING CODE ✨</button>
+  <div id="result"></div>
+  <footer>⚠️ FREEZER MINIBOT · WHATSAPP ⚠️</footer>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let poll = null;
+
+fetch('/api/stats').then(r => r.json()).then(s => { $('stats').textContent = `${s.online} BOTS ONLINE`; }).catch(() => {});
+
+async function getCode() {
+  clearInterval(poll);
+  const num = $('number').value.replace(/[^0-9]/g, '');
+  const out = $('result');
+  if (num.length < 8) { out.innerHTML = '<span class="err">Enter your number with country code 😊</span>'; return; }
+  $('go').disabled = true;
+  out.innerHTML = '<div class="loader"></div><span style="opacity:.7">Connecting to WhatsApp… (≈10s)</span>';
+  try {
+    const d = await (await fetch('/api/pair?number=' + num)).json();
+    if (d.code) {
+      out.innerHTML = `
+        <div style="opacity:.7;font-size:.75rem">YOUR PAIRING CODE</div>
+        <div class="code" onclick="copyCode('${d.code}', this)">${d.code}<small>TAP TO COPY</small></div>
+        <div class="steps">1. Open WhatsApp → <b>Settings → Linked devices</b><br>2. Tap <b>Link a device → Link with phone number instead</b><br>3. Enter the code above<br><br>Code expires in ~3 minutes.</div>
+        <div id="wait" style="opacity:.7;font-size:.8rem">⏳ Waiting for you to link…</div>`;
+      watch(num);
+    } else if (d.status === 'already_connected') {
+      out.innerHTML = '<span class="ok">✅ This number already has a bot running. Send <b>.menu</b> to yourself on WhatsApp.</span>';
+    } else if (d.status === 'reconnecting') {
+      out.innerHTML = '<span class="ok">🔄 This number is registered and reconnecting. Give it a minute.</span>';
+    } else {
+      out.innerHTML = `<span class="err">${d.error || 'Failed, try again.'}</span>`;
+    }
+  } catch (e) {
+    out.innerHTML = '<span class="err">Server unreachable. Try again.</span>';
+  }
+  $('go').disabled = false;
+}
+
+function watch(num) {
+  const t0 = Date.now();
+  poll = setInterval(async () => {
+    try {
+      const s = await (await fetch('/api/status?number=' + num)).json();
+      if (s.connected) {
+        clearInterval(poll);
+        $('result').innerHTML = '<div style="font-size:2.2rem">✅</div><span class="ok"><b>Connected!</b><br>Check your WhatsApp — send <b>.menu</b> to yourself.</span>';
+      } else if (s.status === 'none' && Date.now() - t0 > 20000) {
+        clearInterval(poll);
+        $('result').innerHTML = '<span class="err">Pairing expired. Tap the button for a fresh code.</span>';
+      }
+    } catch {}
+    if (Date.now() - t0 > 200000) clearInterval(poll);
+  }, 2500);
+}
+
+function copyCode(code, el) {
+  try { navigator.clipboard.writeText(code.replace(/-/g, '')); } catch {}
+  const s = el.querySelector('small'); s.textContent = 'COPIED 😊';
+  setTimeout(() => (s.textContent = 'TAP TO COPY'), 1500);
+}
+$('number').addEventListener('keydown', (e) => e.key === 'Enter' && getCode());
+</script>
+</body>
+</html>
