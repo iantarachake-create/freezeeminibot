@@ -7,6 +7,7 @@ const bool = (k, d) => String(env(k, d));
 module.exports = {
   // ---- server / storage ----
   PORT: Number(env('PORT', 8000)),
+  DATABASE_URL: env('DATABASE_URL', ''),    // PostgreSQL (Supabase). takes priority over MONGODB_URI
   MONGODB_URI: env('MONGODB_URI', ''),      // optional, YOUR OWN db. empty => disk storage
   SESSIONS_DIR: env('SESSIONS_DIR', './sessions'),
   MAX_SESSIONS: Number(env('MAX_SESSIONS', 50)),
