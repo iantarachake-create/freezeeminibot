@@ -32,6 +32,7 @@
     "moment-timezone": "^0.6.0",
     "node-fetch": "2.7.0",
     "node-webpmux": "^3.2.0",
+    "pg": "^8.11.3",
     "pino": "^8.17.0",
     "pm2": "^5.4.2",
     "ruhend-scraper": "9.0.1",
