@@ -1,30 +1,27 @@
 const config = require('../config');
 const os = require('os');
-const fs = require('fs');
-const path = require('path');
 const moment = require('moment-timezone');
 const { cmd, commands } = require('../command');
 
-// --- PRE-LOAD IMAGE TO STOP LAG ---
-const menuImagePath = path.resolve('./freezer/menu.jpg');
-let menuImageBuffer = null;
-try {
-    menuImageBuffer = fs.readFileSync(menuImagePath);
-} catch (e) {
-    console.log("Menu image not found, will send text only.");
-}
+// FREEZER MD MENU IMAGE
+const menuImageUrl = 'https://i.ibb.co/v6D9R8mm/IMG-20261027-WA0049-1.jpg';
 
 // Helpers
 const monospace = (text) => `\`${text}\``;
+
 const formatSize = (bytes) => {
-    if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(1) + 'GB';
+    if (bytes >= 1073741824) {
+        return (bytes / 1073741824).toFixed(1) + 'GB';
+    }
     return (bytes / 1048576).toFixed(1) + 'MB';
 };
+
 const formatUptime = (seconds) => {
-    const d = Math.floor(seconds / (24 * 3600));
-    const h = Math.floor((seconds % (24 * 3600)) / 3600);
+    const d = Math.floor(seconds / 86400);
+    const h = Math.floor((seconds % 86400) / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = Math.floor(seconds % 60);
+
     return `${d}d ${h}h ${m}m ${s}s`;
 };
 
@@ -34,72 +31,96 @@ cmd({
     react: '✅',
     category: 'main',
     filename: __filename,
-    desc: 'Show optimized main menu'
-}, async (conn, mek, m, { from, sender, pushName, reply }) => {
+    desc: 'Show FREEZER MD main menu'
+}, async (conn, mek, m, {
+    from, sender, pushName, reply
+}) => {
     try {
         const timeZone = 'Africa/Nairobi';
         const time = moment.tz(timeZone).format('hh:mm:ss A');
         const date = moment.tz(timeZone).format('DD/MM/YYYY');
         const uptime = formatUptime(process.uptime());
-        const ram = `${formatSize(os.totalmem() - os.freemem())}/${formatSize(os.totalmem())}`;
-        const mode = (config.MODE === 'public') ? 'PUBLIC' : 'PRIVATE';
-        const userName = pushName || 'User';
 
-        // Filter and Group Commands
+        const ram =
+            `${formatSize(os.totalmem() - os.freemem())}/` +
+            `${formatSize(os.totalmem())}`;
+
+        const mode =
+            config.MODE === 'public' ? 'PUBLIC' : 'PRIVATE';
+
+        const userName = pushName || 'User';
+        const botName = config.BOT_NAME || 'FREEZER MD';
+
+        // Group commands by category
         const commandsByCategory = {};
         let totalCommands = 0;
+
         commands.forEach(command => {
-            if (command.pattern && !command.dontAdd && command.category) {
-                const cat = command.category.toUpperCase();
-                if (!commandsByCategory[cat]) commandsByCategory[cat] = [];
-                commandsByCategory[cat].push(command.pattern.split('|')[0]);
+            if (
+                command.pattern &&
+                !command.dontAdd &&
+                command.category
+            ) {
+                const category = command.category.toUpperCase();
+
+                if (!commandsByCategory[category]) {
+                    commandsByCategory[category] = [];
+                }
+
+                commandsByCategory[category].push(
+                    command.pattern.split('|')[0]
+                );
+
                 totalCommands++;
             }
         });
 
-        // Construct Menu String
-        let menu = `╭══〘 *${monospace(config.BOT_NAME || 'POP KID-MD')}* 〙══⊷
+        // Build menu caption
+        let menu = `╭══〘 *${monospace(botName)}* 〙══⊷
 ┃❍ *Mode:* ${monospace(mode)}
 ┃❍ *User:* ${monospace(userName)}
 ┃❍ *Plugins:* ${monospace(totalCommands)}
 ┃❍ *Uptime:* ${monospace(uptime)}
+┃❍ *Time:* ${monospace(time)}
 ┃❍ *Date:* ${monospace(date)}
 ┃❍ *RAM:* ${monospace(ram)}
-┃❍ *Ping:* ${monospace(Math.floor(Math.random() * 50) + 10 + 'ms')}
 ╰═════════════════⊷
 
-*Command List ⤵*`;
+*COMMAND LIST ⤵*`;
 
-        for (const category in commandsByCategory) {
+        // Add categories
+        for (const category of Object.keys(commandsByCategory).sort()) {
             menu += `\n\n╭━━━━❮ *${monospace(category)}* ❯━⊷\n`;
-            commandsByCategory[category].sort().forEach(cmdName => {
-                menu += `┃✞︎ ${monospace(config.PREFIX + cmdName)}\n`;
-            });
+
+            commandsByCategory[category]
+                .sort()
+                .forEach(commandName => {
+                    menu += `┃✞ ${monospace(
+                        (config.PREFIX || '.') + commandName
+                    )}\n`;
+                });
+
             menu += `╰━━━━━━━━━━━━━━━━━⊷`;
         }
 
-        menu += `\n\n> *${config.BOT_NAME || 'POP KID-MD'}* © 2026 🇰🇪`;
+        menu += `\n\n> *${botName}* © 2026 🇰🇪`;
 
-        // Efficient Send
-        await conn.sendMessage(from, {
-            image: menuImageBuffer ? { url: menuImagePath } : { url: 'https://via.placeholder.com/500' },
-            caption: menu,
-            contextInfo: {
-                mentionedJid: [sender],
-                forwardingScore: 1,
-                externalAdReply: {
-                    title: 'POP KID-MD V2 ADVANCED',
-                    body: 'FREEZER TECH',
-                    thumbnail: menuImageBuffer,
-                    sourceUrl: 'https://whatsapp.com/channel/0029VacgxK96hENmSRMRxx1r',
-                    mediaType: 1,
-                    renderLargerThumbnail: true
+        // Send ONE image with the menu caption.
+        // No externalAdReply thumbnail, so no duplicate image.
+        await conn.sendMessage(
+            from,
+            {
+                image: { url: menuImageUrl },
+                caption: menu,
+                contextInfo: {
+                    mentionedJid: [sender]
                 }
-            }
-        }, { quoted: mek });
+            },
+            { quoted: mek }
+        );
 
-    } catch (e) {
-        console.error(e);
+    } catch (error) {
+        console.error('FREEZER MD menu error:', error);
         reply('❌ Menu processing error.');
     }
 });
